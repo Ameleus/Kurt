@@ -1,6 +1,6 @@
 {
     "SoftwareVersion": "1.0",
     "SoftwareUrl":"",
-    "Status":"False",
+    "Status":"true",
     "Changelog":"[+] Build Start"
 }
