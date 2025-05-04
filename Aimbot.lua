@@ -1,401 +1,932 @@
 --[[
 
-	Universal Aimbot Module by Exunys © CC0 1.0 Universal (2023 - 2024)
+	AirHub by Exunys © CC0 1.0 Universal (2023)
+
 	https://github.com/Exunys
 
 ]]
 
 --// Cache
 
-local game, workspace = game, workspace
-local getrawmetatable, getmetatable, setmetatable, pcall, getgenv, next, tick = getrawmetatable, getmetatable, setmetatable, pcall, getgenv, next, tick
-local Vector2new, Vector3zero, CFramenew, Color3fromRGB, Color3fromHSV, Drawingnew, TweenInfonew = Vector2.new, Vector3.zero, CFrame.new, Color3.fromRGB, Color3.fromHSV, Drawing.new, TweenInfo.new
-local getupvalue, mousemoverel, tablefind, tableremove, stringlower, stringsub, mathclamp = debug.getupvalue, mousemoverel or (Input and Input.MouseMove), table.find, table.remove, string.lower, string.sub, math.clamp
+local loadstring, getgenv, setclipboard, tablefind, UserInputService = loadstring, getgenv, setclipboard, table.find, game:GetService("UserInputService")
 
-local GameMetatable = getrawmetatable and getrawmetatable(game) or {
-	-- Auxillary functions - if the executor doesn't support "getrawmetatable".
+--// Loaded check
 
-	__index = function(self, Index)
-		return self[Index]
-	end,
-
-	__newindex = function(self, Index, Value)
-		self[Index] = Value
-	end
-}
-
-local __index = GameMetatable.__index
-local __newindex = GameMetatable.__newindex
-
-local getrenderproperty, setrenderproperty = getrenderproperty or __index, setrenderproperty or __newindex
-
-local GetService = __index(game, "GetService")
-
---// Services
-
-local RunService = GetService(game, "RunService")
-local UserInputService = GetService(game, "UserInputService")
-local TweenService = GetService(game, "TweenService")
-local Players = GetService(game, "Players")
-
---// Service Methods
-
-local LocalPlayer = __index(Players, "LocalPlayer")
-local Camera = __index(workspace, "CurrentCamera")
-
-local FindFirstChild, FindFirstChildOfClass = __index(game, "FindFirstChild"), __index(game, "FindFirstChildOfClass")
-local GetDescendants = __index(game, "GetDescendants")
-local WorldToViewportPoint = __index(Camera, "WorldToViewportPoint")
-local GetPartsObscuringTarget = __index(Camera, "GetPartsObscuringTarget")
-local GetMouseLocation = __index(UserInputService, "GetMouseLocation")
-local GetPlayers = __index(Players, "GetPlayers")
-
---// Variables
-
-local RequiredDistance, Typing, Running, ServiceConnections, Animation, OriginalSensitivity = 2000, false, false, {}
-local Connect, Disconnect = __index(game, "DescendantAdded").Connect
-
---[[
-local Degrade = false
-
-do
-	xpcall(function()
-		local TemporaryDrawing = Drawingnew("Line")
-		getrenderproperty = getupvalue(getmetatable(TemporaryDrawing).__index, 4)
-		setrenderproperty = getupvalue(getmetatable(TemporaryDrawing).__newindex, 4)
-		TemporaryDrawing.Remove(TemporaryDrawing)
-	end, function()
-		Degrade, getrenderproperty, setrenderproperty = true, function(Object, Key)
-			return Object[Key]
-		end, function(Object, Key, Value)
-			Object[Key] = Value
-		end
-	end)
-
-	local TemporaryConnection = Connect(__index(game, "DescendantAdded"), function() end)
-	Disconnect = TemporaryConnection.Disconnect
-	Disconnect(TemporaryConnection)
-end
-]]
-
---// Checking for multiple processes
-
-if ExunysDeveloperAimbot and ExunysDeveloperAimbot.Exit then
-	ExunysDeveloperAimbot:Exit()
+if AirHub or AirHubV2Loaded then
+    return
 end
 
 --// Environment
 
-getgenv().ExunysDeveloperAimbot = {
-	DeveloperSettings = {
-		UpdateMode = "RenderStepped",
-		TeamCheckOption = "TeamColor",
-		RainbowSpeed = 1 -- Bigger = Slower
+getgenv().AirHub = {}
+
+--// Load Modules
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/AirHub/main/Modules/Aimbot.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/AirHub/main/Modules/Wall%20Hack.lua"))()
+
+--// Variables
+
+local Library = loadstring(game:GetObjects("rbxassetid://7657867786")[1].Source)() -- Pepsi's UI Library
+local Aimbot, WallHack = getgenv().AirHub.Aimbot, getgenv().AirHub.WallHack
+local Parts, Fonts, TracersType = {"Head", "HumanoidRootPart", "Torso", "Left Arm", "Right Arm", "Left Leg", "Right Leg", "LeftHand", "RightHand", "LeftLowerArm", "RightLowerArm", "LeftUpperArm", "RightUpperArm", "LeftFoot", "LeftLowerLeg", "UpperTorso", "LeftUpperLeg", "RightFoot", "RightLowerLeg", "LowerTorso", "RightUpperLeg"}, {"UI", "System", "Plex", "Monospace"}, {"Bottom", "Center", "Mouse"}
+
+--// Frame
+
+Library.UnloadCallback = function()
+	Aimbot.Functions:Exit()
+	WallHack.Functions:Exit()
+	getgenv().AirHub = nil
+end
+
+local MainFrame = Library:CreateWindow({
+	Name = "AirHub",
+	Themeable = {
+		Image = "7059346386",
+		Info = "Made by Exunys\nPowered by Pepsi's UI Library",
+		Credit = false
 	},
+	Background = "",
+	Theme = [[{"__Designer.Colors.topGradient":"3F0C64","__Designer.Colors.section":"C259FB","__Designer.Colors.hoveredOptionBottom":"4819B4","__Designer.Background.ImageAssetID":"rbxassetid://4427304036","__Designer.Colors.selectedOption":"4E149C","__Designer.Colors.unselectedOption":"482271","__Designer.Files.WorkspaceFile":"AirHub","__Designer.Colors.unhoveredOptionTop":"310269","__Designer.Colors.outerBorder":"391D57","__Designer.Background.ImageColor":"69009C","__Designer.Colors.tabText":"B9B9B9","__Designer.Colors.elementBorder":"160B24","__Designer.Background.ImageTransparency":100,"__Designer.Colors.background":"1E1237","__Designer.Colors.innerBorder":"531E79","__Designer.Colors.bottomGradient":"361A60","__Designer.Colors.sectionBackground":"21002C","__Designer.Colors.hoveredOptionTop":"6B10F9","__Designer.Colors.otherElementText":"7B44A8","__Designer.Colors.main":"AB26FF","__Designer.Colors.elementText":"9F7DB5","__Designer.Colors.unhoveredOptionBottom":"3E0088","__Designer.Background.UseBackgroundImage":false}]]
+})
 
-	Settings = {
-		Enabled = true,
+--// Tabs
 
-		TeamCheck = false,
-		AliveCheck = true,
-		WallCheck = false,
+local AimbotTab = MainFrame:CreateTab({
+	Name = "Aimbot"
+})
 
-		OffsetToMoveDirection = false,
-		OffsetIncrement = 15,
+local VisualsTab = MainFrame:CreateTab({
+	Name = "Visuals"
+})
 
-		Sensitivity = 0, -- Animation length (in seconds) before fully locking onto target
-		Sensitivity2 = 3.5, -- mousemoverel Sensitivity
+local CrosshairTab = MainFrame:CreateTab({
+	Name = "Crosshair"
+})
 
-		LockMode = 1, -- 1 = CFrame; 2 = mousemoverel
-		LockPart = "Head", -- Body part to lock on
+local FunctionsTab = MainFrame:CreateTab({
+	Name = "Functions"
+})
 
-		TriggerKey = Enum.UserInputType.MouseButton2,
-		Toggle = false
-	},
+--// Aimbot Sections
 
-	FOVSettings = {
-		Enabled = true,
-		Visible = true,
+local Values = AimbotTab:CreateSection({
+	Name = "Values"
+})
 
-		Radius = 90,
-		NumSides = 60,
+local Checks = AimbotTab:CreateSection({
+	Name = "Checks"
+})
 
-		Thickness = 1,
-		Transparency = 1,
-		Filled = false,
+local ThirdPerson = AimbotTab:CreateSection({
+	Name = "Third Person"
+})
 
-		RainbowColor = false,
-		RainbowOutlineColor = false,
-		Color = Color3fromRGB(255, 255, 255),
-		OutlineColor = Color3fromRGB(0, 0, 0),
-		LockedColor = Color3fromRGB(255, 150, 150)
-	},
+local FOV_Values = AimbotTab:CreateSection({
+	Name = "Field Of View",
+	Side = "Right"
+})
 
-	Blacklisted = {},
-	FOVCircleOutline = Drawingnew("Circle"),
-	FOVCircle = Drawingnew("Circle")
-}
+local FOV_Appearance = AimbotTab:CreateSection({
+	Name = "FOV Circle Appearance",
+	Side = "Right"
+})
 
-local Environment = getgenv().ExunysDeveloperAimbot
+--// Visuals Sections
 
-setrenderproperty(Environment.FOVCircle, "Visible", false)
-setrenderproperty(Environment.FOVCircleOutline, "Visible", false)
+local WallHackChecks = VisualsTab:CreateSection({
+	Name = "Checks"
+})
 
---// Core Functions
+local ESPSettings = VisualsTab:CreateSection({
+	Name = "ESP Settings"
+})
 
-local FixUsername = function(String)
-	local Result
+local BoxesSettings = VisualsTab:CreateSection({
+	Name = "Boxes Settings"
+})
 
-	for _, Value in next, GetPlayers(Players) do
-		local Name = __index(Value, "Name")
+local ChamsSettings = VisualsTab:CreateSection({
+	Name = "Chams Settings"
+})
 
-		if stringsub(stringlower(Name), 1, #String) == stringlower(String) then
-			Result = Name
-		end
+local TracersSettings = VisualsTab:CreateSection({
+	Name = "Tracers Settings",
+	Side = "Right"
+})
+
+local HeadDotsSettings = VisualsTab:CreateSection({
+	Name = "Head Dots Settings",
+	Side = "Right"
+})
+
+local HealthBarSettings = VisualsTab:CreateSection({
+	Name = "Health Bar Settings",
+	Side = "Right"
+})
+
+--// Crosshair Sections
+
+local CrosshairSettings = CrosshairTab:CreateSection({
+	Name = "Settings"
+})
+
+local CrosshairSettings_CenterDot = CrosshairTab:CreateSection({
+	Name = "Center Dot Settings",
+	Side = "Right"
+})
+
+--// Functions Sections
+
+local FunctionsSection = FunctionsTab:CreateSection({
+	Name = "Functions"
+})
+
+--// Aimbot Values
+
+Values:AddToggle({
+	Name = "Enabled",
+	Value = Aimbot.Settings.Enabled,
+	Callback = function(New, Old)
+		Aimbot.Settings.Enabled = New
 	end
+}).Default = Aimbot.Settings.Enabled
 
-	return Result
-end
-
-local GetRainbowColor = function()
-	local RainbowSpeed = Environment.DeveloperSettings.RainbowSpeed
-
-	return Color3fromHSV(tick() % RainbowSpeed / RainbowSpeed, 1, 1)
-end
-
-local ConvertVector = function(Vector)
-	return Vector2new(Vector.X, Vector.Y)
-end
-
-local CancelLock = function()
-	Environment.Locked = nil
-
-	local FOVCircle = Environment.FOVCircle--Degrade and Environment.FOVCircle or Environment.FOVCircle.__OBJECT
-
-	setrenderproperty(FOVCircle, "Color", Environment.FOVSettings.Color)
-	__newindex(UserInputService, "MouseDeltaSensitivity", OriginalSensitivity)
-
-	if Animation then
-		Animation:Cancel()
+Values:AddToggle({
+	Name = "Toggle",
+	Value = Aimbot.Settings.Toggle,
+	Callback = function(New, Old)
+		Aimbot.Settings.Toggle = New
 	end
-end
+}).Default = Aimbot.Settings.Toggle
 
-local GetClosestPlayer = function()
-	local Settings = Environment.Settings
-	local LockPart = Settings.LockPart
+Aimbot.Settings.LockPart = Parts[1]; Values:AddDropdown({
+	Name = "Lock Part",
+	Value = Parts[1],
+	Callback = function(New, Old)
+		Aimbot.Settings.LockPart = New
+	end,
+	List = Parts,
+	Nothing = "Head"
+}).Default = Parts[1]
 
-	if not Environment.Locked then
-		RequiredDistance = Environment.FOVSettings.Enabled and Environment.FOVSettings.Radius or 2000
-
-		for _, Value in next, GetPlayers(Players) do
-			local Character = __index(Value, "Character")
-			local Humanoid = Character and FindFirstChildOfClass(Character, "Humanoid")
-
-			if Value ~= LocalPlayer and not tablefind(Environment.Blacklisted, __index(Value, "Name")) and Character and FindFirstChild(Character, LockPart) and Humanoid then
-				local PartPosition, TeamCheckOption = __index(Character[LockPart], "Position"), Environment.DeveloperSettings.TeamCheckOption
-
-				if Settings.TeamCheck and __index(Value, TeamCheckOption) == __index(LocalPlayer, TeamCheckOption) then
-					continue
-				end
-
-				if Settings.AliveCheck and __index(Humanoid, "Health") <= 0 then
-					continue
-				end
-
-				if Settings.WallCheck then
-					local BlacklistTable = GetDescendants(__index(LocalPlayer, "Character"))
-
-					for _, Value in next, GetDescendants(Character) do
-						BlacklistTable[#BlacklistTable + 1] = Value
-					end
-
-					if #GetPartsObscuringTarget(Camera, {PartPosition}, BlacklistTable) > 0 then
-						continue
-					end
-				end
-
-				local Vector, OnScreen, Distance = WorldToViewportPoint(Camera, PartPosition)
-				Vector = ConvertVector(Vector)
-				Distance = (GetMouseLocation(UserInputService) - Vector).Magnitude
-
-				if Distance < RequiredDistance and OnScreen then
-					RequiredDistance, Environment.Locked = Distance, Value
-				end
-			end
-		end
-	elseif (GetMouseLocation(UserInputService) - ConvertVector(WorldToViewportPoint(Camera, __index(__index(__index(Environment.Locked, "Character"), LockPart), "Position")))).Magnitude > RequiredDistance then
-		CancelLock()
+Values:AddTextbox({ -- Using a Textbox instead of a Keybind because the UI Library doesn't support Mouse inputs like Left Click / Right Click...
+	Name = "Hotkey",
+	Value = Aimbot.Settings.TriggerKey,
+	Callback = function(New, Old)
+		Aimbot.Settings.TriggerKey = New
 	end
-end
+}).Default = Aimbot.Settings.TriggerKey
 
-local Load = function()
-	OriginalSensitivity = __index(UserInputService, "MouseDeltaSensitivity")
+--[[
+Values:AddKeybind({
+	Name = "Hotkey",
+	Value = Aimbot.Settings.TriggerKey,
+	Callback = function(New, Old)
+		Aimbot.Settings.TriggerKey = stringmatch(tostring(New), "Enum%.[UserInputType]*[KeyCode]*%.(.+)")
+	end,
+}).Default = Aimbot.Settings.TriggerKey
+]]
 
-	local Settings, FOVCircle, FOVCircleOutline, FOVSettings, Offset = Environment.Settings, Environment.FOVCircle, Environment.FOVCircleOutline, Environment.FOVSettings
+Values:AddSlider({
+	Name = "Sensitivity",
+	Value = Aimbot.Settings.Sensitivity,
+	Callback = function(New, Old)
+		Aimbot.Settings.Sensitivity = New
+	end,
+	Min = 0,
+	Max = 1,
+	Decimals = 2
+}).Default = Aimbot.Settings.Sensitivity
 
-	--[[
-	if not Degrade then
-		FOVCircle, FOVCircleOutline = FOVCircle.__OBJECT, FOVCircleOutline.__OBJECT
+--// Aimbot Checks
+
+Checks:AddToggle({
+	Name = "Team Check",
+	Value = Aimbot.Settings.TeamCheck,
+	Callback = function(New, Old)
+		Aimbot.Settings.TeamCheck = New
 	end
-	]]
+}).Default = Aimbot.Settings.TeamCheck
 
-	ServiceConnections.RenderSteppedConnection = Connect(__index(RunService, Environment.DeveloperSettings.UpdateMode), function()
-		local OffsetToMoveDirection, LockPart = Settings.OffsetToMoveDirection, Settings.LockPart
+Checks:AddToggle({
+	Name = "Wall Check",
+	Value = Aimbot.Settings.WallCheck,
+	Callback = function(New, Old)
+		Aimbot.Settings.WallCheck = New
+	end
+}).Default = Aimbot.Settings.WallCheck
 
-		if FOVSettings.Enabled and Settings.Enabled then
-			for Index, Value in next, FOVSettings do
-				if Index == "Color" then
-					continue
-				end
+Checks:AddToggle({
+	Name = "Alive Check",
+	Value = Aimbot.Settings.AliveCheck,
+	Callback = function(New, Old)
+		Aimbot.Settings.AliveCheck = New
+	end
+}).Default = Aimbot.Settings.AliveCheck
 
-				if pcall(getrenderproperty, FOVCircle, Index) then
-					setrenderproperty(FOVCircle, Index, Value)
-					setrenderproperty(FOVCircleOutline, Index, Value)
-				end
-			end
+--// Aimbot ThirdPerson
 
-			setrenderproperty(FOVCircle, "Color", (Environment.Locked and FOVSettings.LockedColor) or FOVSettings.RainbowColor and GetRainbowColor() or FOVSettings.Color)
-			setrenderproperty(FOVCircleOutline, "Color", FOVSettings.RainbowOutlineColor and GetRainbowColor() or FOVSettings.OutlineColor)
+ThirdPerson:AddToggle({
+	Name = "Enable Third Person",
+	Value = Aimbot.Settings.ThirdPerson,
+	Callback = function(New, Old)
+		Aimbot.Settings.ThirdPerson = New
+	end
+}).Default = Aimbot.Settings.ThirdPerson
 
-			setrenderproperty(FOVCircleOutline, "Thickness", FOVSettings.Thickness + 1)
-			setrenderproperty(FOVCircle, "Position", GetMouseLocation(UserInputService))
-			setrenderproperty(FOVCircleOutline, "Position", GetMouseLocation(UserInputService))
-		else
-			setrenderproperty(FOVCircle, "Visible", false)
-			setrenderproperty(FOVCircleOutline, "Visible", false)
-		end
+ThirdPerson:AddSlider({
+	Name = "Sensitivity",
+	Value = Aimbot.Settings.ThirdPersonSensitivity,
+	Callback = function(New, Old)
+		Aimbot.Settings.ThirdPersonSensitivity = New
+	end,
+	Min = 0.1,
+	Max = 5,
+	Decimals = 1
+}).Default = Aimbot.Settings.ThirdPersonSensitivity
 
-		if Running and Settings.Enabled then
-			GetClosestPlayer()
+--// FOV Settings Values
 
-			Offset = OffsetToMoveDirection and __index(FindFirstChildOfClass(__index(Environment.Locked, "Character"), "Humanoid"), "MoveDirection") * (mathclamp(Settings.OffsetIncrement, 1, 30) / 10) or Vector3zero
+FOV_Values:AddToggle({
+	Name = "Enabled",
+	Value = Aimbot.FOVSettings.Enabled,
+	Callback = function(New, Old)
+		Aimbot.FOVSettings.Enabled = New
+	end
+}).Default = Aimbot.FOVSettings.Enabled
 
-			if Environment.Locked then
-				local LockedPosition_Vector3 = __index(__index(Environment.Locked, "Character")[LockPart], "Position")
-				local LockedPosition = WorldToViewportPoint(Camera, LockedPosition_Vector3 + Offset)
+FOV_Values:AddToggle({
+	Name = "Visible",
+	Value = Aimbot.FOVSettings.Visible,
+	Callback = function(New, Old)
+		Aimbot.FOVSettings.Visible = New
+	end
+}).Default = Aimbot.FOVSettings.Visible
 
-				if Environment.Settings.LockMode == 2 then
-					mousemoverel((LockedPosition.X - GetMouseLocation(UserInputService).X) / Settings.Sensitivity2, (LockedPosition.Y - GetMouseLocation(UserInputService).Y) / Settings.Sensitivity2)
-				else
-					if Settings.Sensitivity > 0 then
-						Animation = TweenService:Create(Camera, TweenInfonew(Environment.Settings.Sensitivity, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = CFramenew(Camera.CFrame.Position, LockedPosition_Vector3)})
-						Animation:Play()
-					else
-						__newindex(Camera, "CFrame", CFramenew(Camera.CFrame.Position, LockedPosition_Vector3 + Offset))
-					end
+FOV_Values:AddSlider({
+	Name = "Amount",
+	Value = Aimbot.FOVSettings.Amount,
+	Callback = function(New, Old)
+		Aimbot.FOVSettings.Amount = New
+	end,
+	Min = 10,
+	Max = 300
+}).Default = Aimbot.FOVSettings.Amount
 
-					__newindex(UserInputService, "MouseDeltaSensitivity", 0)
-				end
+--// FOV Settings Appearance
 
-				setrenderproperty(FOVCircle, "Color", FOVSettings.LockedColor)
-			end
-		end
-	end)
+FOV_Appearance:AddToggle({
+	Name = "Filled",
+	Value = Aimbot.FOVSettings.Filled,
+	Callback = function(New, Old)
+		Aimbot.FOVSettings.Filled = New
+	end
+}).Default = Aimbot.FOVSettings.Filled
 
-	ServiceConnections.InputBeganConnection = Connect(__index(UserInputService, "InputBegan"), function(Input)
-		local TriggerKey, Toggle = Settings.TriggerKey, Settings.Toggle
+FOV_Appearance:AddSlider({
+	Name = "Transparency",
+	Value = Aimbot.FOVSettings.Transparency,
+	Callback = function(New, Old)
+		Aimbot.FOVSettings.Transparency = New
+	end,
+	Min = 0,
+	Max = 1,
+	Decimal = 1
+}).Default = Aimbot.FOVSettings.Transparency
 
-		if Typing then
+FOV_Appearance:AddSlider({
+	Name = "Sides",
+	Value = Aimbot.FOVSettings.Sides,
+	Callback = function(New, Old)
+		Aimbot.FOVSettings.Sides = New
+	end,
+	Min = 3,
+	Max = 60
+}).Default = Aimbot.FOVSettings.Sides
+
+FOV_Appearance:AddSlider({
+	Name = "Thickness",
+	Value = Aimbot.FOVSettings.Thickness,
+	Callback = function(New, Old)
+		Aimbot.FOVSettings.Thickness = New
+	end,
+	Min = 1,
+	Max = 50
+}).Default = Aimbot.FOVSettings.Thickness
+
+FOV_Appearance:AddColorpicker({
+	Name = "Color",
+	Value = Aimbot.FOVSettings.Color,
+	Callback = function(New, Old)
+		Aimbot.FOVSettings.Color = New
+	end
+}).Default = Aimbot.FOVSettings.Color
+
+FOV_Appearance:AddColorpicker({
+	Name = "Locked Color",
+	Value = Aimbot.FOVSettings.LockedColor,
+	Callback = function(New, Old)
+		Aimbot.FOVSettings.LockedColor = New
+	end
+}).Default = Aimbot.FOVSettings.LockedColor
+
+--// Wall Hack Settings
+
+WallHackChecks:AddToggle({
+	Name = "Enabled",
+	Value = WallHack.Settings.Enabled,
+	Callback = function(New, Old)
+		WallHack.Settings.Enabled = New
+	end
+}).Default = WallHack.Settings.Enabled
+
+WallHackChecks:AddToggle({
+	Name = "Team Check",
+	Value = WallHack.Settings.TeamCheck,
+	Callback = function(New, Old)
+		WallHack.Settings.TeamCheck = New
+	end
+}).Default = WallHack.Settings.TeamCheck
+
+WallHackChecks:AddToggle({
+	Name = "Alive Check",
+	Value = WallHack.Settings.AliveCheck,
+	Callback = function(New, Old)
+		WallHack.Settings.AliveCheck = New
+	end
+}).Default = WallHack.Settings.AliveCheck
+
+--// Visuals Settings
+
+ESPSettings:AddToggle({
+	Name = "Enabled",
+	Value = WallHack.Visuals.ESPSettings.Enabled,
+	Callback = function(New, Old)
+		WallHack.Visuals.ESPSettings.Enabled = New
+	end
+}).Default = WallHack.Visuals.ESPSettings.Enabled
+
+ESPSettings:AddToggle({
+	Name = "Outline",
+	Value = WallHack.Visuals.ESPSettings.Outline,
+	Callback = function(New, Old)
+		WallHack.Visuals.ESPSettings.Outline = New
+	end
+}).Default = WallHack.Visuals.ESPSettings.Outline
+
+ESPSettings:AddToggle({
+	Name = "Display Distance",
+	Value = WallHack.Visuals.ESPSettings.DisplayDistance,
+	Callback = function(New, Old)
+		WallHack.Visuals.ESPSettings.DisplayDistance = New
+	end
+}).Default = WallHack.Visuals.ESPSettings.DisplayDistance
+
+ESPSettings:AddToggle({
+	Name = "Display Health",
+	Value = WallHack.Visuals.ESPSettings.DisplayHealth,
+	Callback = function(New, Old)
+		WallHack.Visuals.ESPSettings.DisplayHealth = New
+	end
+}).Default = WallHack.Visuals.ESPSettings.DisplayHealth
+
+ESPSettings:AddToggle({
+	Name = "Display Name",
+	Value = WallHack.Visuals.ESPSettings.DisplayName,
+	Callback = function(New, Old)
+		WallHack.Visuals.ESPSettings.DisplayName = New
+	end
+}).Default = WallHack.Visuals.ESPSettings.DisplayName
+
+ESPSettings:AddSlider({
+	Name = "Offset",
+	Value = WallHack.Visuals.ESPSettings.Offset,
+	Callback = function(New, Old)
+		WallHack.Visuals.ESPSettings.Offset = New
+	end,
+	Min = -30,
+	Max = 30
+}).Default = WallHack.Visuals.ESPSettings.Offset
+
+ESPSettings:AddColorpicker({
+	Name = "Text Color",
+	Value = WallHack.Visuals.ESPSettings.TextColor,
+	Callback = function(New, Old)
+		WallHack.Visuals.ESPSettings.TextColor = New
+	end
+}).Default = WallHack.Visuals.ESPSettings.TextColor
+
+ESPSettings:AddColorpicker({
+	Name = "Outline Color",
+	Value = WallHack.Visuals.ESPSettings.OutlineColor,
+	Callback = function(New, Old)
+		WallHack.Visuals.ESPSettings.OutlineColor = New
+	end
+}).Default = WallHack.Visuals.ESPSettings.OutlineColor
+
+ESPSettings:AddSlider({
+	Name = "Text Transparency",
+	Value = WallHack.Visuals.ESPSettings.TextTransparency,
+	Callback = function(New, Old)
+		WallHack.Visuals.ESPSettings.TextTransparency = New
+	end,
+	Min = 0,
+	Max = 1,
+	Decimals = 2
+}).Default = WallHack.Visuals.ESPSettings.TextTransparency
+
+ESPSettings:AddSlider({
+	Name = "Text Size",
+	Value = WallHack.Visuals.ESPSettings.TextSize,
+	Callback = function(New, Old)
+		WallHack.Visuals.ESPSettings.TextSize = New
+	end,
+	Min = 8,
+	Max = 24
+}).Default = WallHack.Visuals.ESPSettings.TextSize
+
+ESPSettings:AddDropdown({
+	Name = "Text Font",
+	Value = Fonts[WallHack.Visuals.ESPSettings.TextFont + 1],
+	Callback = function(New, Old)
+		WallHack.Visuals.ESPSettings.TextFont = Drawing.Fonts[New]
+	end,
+	List = Fonts,
+	Nothing = "UI"
+}).Default = Fonts[WallHack.Visuals.ESPSettings.TextFont + 1]
+
+BoxesSettings:AddToggle({
+	Name = "Enabled",
+	Value = WallHack.Visuals.BoxSettings.Enabled,
+	Callback = function(New, Old)
+		WallHack.Visuals.BoxSettings.Enabled = New
+	end
+}).Default = WallHack.Visuals.BoxSettings.Enabled
+
+BoxesSettings:AddSlider({
+	Name = "Transparency",
+	Value = WallHack.Visuals.BoxSettings.Transparency,
+	Callback = function(New, Old)
+		WallHack.Visuals.BoxSettings.Transparency = New
+	end,
+	Min = 0,
+	Max = 1,
+	Decimals = 2
+}).Default = WallHack.Visuals.BoxSettings.Transparency
+
+BoxesSettings:AddSlider({
+	Name = "Thickness",
+	Value = WallHack.Visuals.BoxSettings.Thickness,
+	Callback = function(New, Old)
+		WallHack.Visuals.BoxSettings.Thickness = New
+	end,
+	Min = 1,
+	Max = 5
+}).Default = WallHack.Visuals.BoxSettings.Thickness
+
+BoxesSettings:AddSlider({
+	Name = "Scale Increase (For 3D)",
+	Value = WallHack.Visuals.BoxSettings.Increase,
+	Callback = function(New, Old)
+		WallHack.Visuals.BoxSettings.Increase = New
+	end,
+	Min = 1,
+	Max = 5
+}).Default = WallHack.Visuals.BoxSettings.Increase
+
+BoxesSettings:AddColorpicker({
+	Name = "Color",
+	Value = WallHack.Visuals.BoxSettings.Color,
+	Callback = function(New, Old)
+		WallHack.Visuals.BoxSettings.Color = New
+	end
+}).Default = WallHack.Visuals.BoxSettings.Color
+
+BoxesSettings:AddDropdown({
+	Name = "Type",
+	Value = WallHack.Visuals.BoxSettings.Type == 1 and "3D" or "2D",
+	Callback = function(New, Old)
+		WallHack.Visuals.BoxSettings.Type = New == "3D" and 1 or 2
+	end,
+	List = {"3D", "2D"},
+	Nothing = "3D"
+}).Default = WallHack.Visuals.BoxSettings.Type == 1 and "3D" or "2D"
+
+BoxesSettings:AddToggle({
+	Name = "Filled (2D Square)",
+	Value = WallHack.Visuals.BoxSettings.Filled,
+	Callback = function(New, Old)
+		WallHack.Visuals.BoxSettings.Filled = New
+	end
+}).Default = WallHack.Visuals.BoxSettings.Filled
+
+ChamsSettings:AddToggle({
+	Name = "Enabled",
+	Value = WallHack.Visuals.ChamsSettings.Enabled,
+	Callback = function(New, Old)
+		WallHack.Visuals.ChamsSettings.Enabled = New
+	end
+}).Default = WallHack.Visuals.ChamsSettings.Enabled
+
+ChamsSettings:AddToggle({
+	Name = "Filled",
+	Value = WallHack.Visuals.ChamsSettings.Filled,
+	Callback = function(New, Old)
+		WallHack.Visuals.ChamsSettings.Filled = New
+	end
+}).Default = WallHack.Visuals.ChamsSettings.Filled
+
+ChamsSettings:AddToggle({
+	Name = "Entire Body (For R15 Rigs)",
+	Value = WallHack.Visuals.ChamsSettings.EntireBody,
+	Callback = function(New, Old)
+		WallHack.Visuals.ChamsSettings.EntireBody = New
+	end
+}).Default = WallHack.Visuals.ChamsSettings.EntireBody
+
+ChamsSettings:AddSlider({
+	Name = "Transparency",
+	Value = WallHack.Visuals.ChamsSettings.Transparency,
+	Callback = function(New, Old)
+		WallHack.Visuals.ChamsSettings.Transparency = New
+	end,
+	Min = 0,
+	Max = 1,
+	Decimals = 2
+}).Default = WallHack.Visuals.ChamsSettings.Transparency
+
+ChamsSettings:AddSlider({
+	Name = "Thickness",
+	Value = WallHack.Visuals.ChamsSettings.Thickness,
+	Callback = function(New, Old)
+		WallHack.Visuals.ChamsSettings.Thickness = New
+	end,
+	Min = 0,
+	Max = 3
+}).Default = WallHack.Visuals.ChamsSettings.Thickness
+
+ChamsSettings:AddColorpicker({
+	Name = "Color",
+	Value = WallHack.Visuals.ChamsSettings.Color,
+	Callback = function(New, Old)
+		WallHack.Visuals.ChamsSettings.Color = New
+	end
+}).Default = WallHack.Visuals.ChamsSettings.Color
+
+TracersSettings:AddToggle({
+	Name = "Enabled",
+	Value = WallHack.Visuals.TracersSettings.Enabled,
+	Callback = function(New, Old)
+		WallHack.Visuals.TracersSettings.Enabled = New
+	end
+}).Default = WallHack.Visuals.TracersSettings.Enabled
+
+TracersSettings:AddSlider({
+	Name = "Transparency",
+	Value = WallHack.Visuals.TracersSettings.Transparency,
+	Callback = function(New, Old)
+		WallHack.Visuals.TracersSettings.Transparency = New
+	end,
+	Min = 0,
+	Max = 1,
+	Decimals = 2
+}).Default = WallHack.Visuals.TracersSettings.Transparency
+
+TracersSettings:AddSlider({
+	Name = "Thickness",
+	Value = WallHack.Visuals.TracersSettings.Thickness,
+	Callback = function(New, Old)
+		WallHack.Visuals.TracersSettings.Thickness = New
+	end,
+	Min = 1,
+	Max = 5
+}).Default = WallHack.Visuals.TracersSettings.Thickness
+
+TracersSettings:AddColorpicker({
+	Name = "Color",
+	Value = WallHack.Visuals.TracersSettings.Color,
+	Callback = function(New, Old)
+		WallHack.Visuals.TracersSettings.Color = New
+	end
+}).Default = WallHack.Visuals.TracersSettings.Color
+
+TracersSettings:AddDropdown({
+	Name = "Start From",
+	Value = TracersType[WallHack.Visuals.TracersSettings.Type],
+	Callback = function(New, Old)
+		WallHack.Visuals.TracersSettings.Type = tablefind(TracersType, New)
+	end,
+	List = TracersType,
+	Nothing = "Bottom"
+}).Default = Fonts[WallHack.Visuals.TracersSettings.Type + 1]
+
+HeadDotsSettings:AddToggle({
+	Name = "Enabled",
+	Value = WallHack.Visuals.HeadDotSettings.Enabled,
+	Callback = function(New, Old)
+		WallHack.Visuals.HeadDotSettings.Enabled = New
+	end
+}).Default = WallHack.Visuals.HeadDotSettings.Enabled
+
+HeadDotsSettings:AddToggle({
+	Name = "Filled",
+	Value = WallHack.Visuals.HeadDotSettings.Filled,
+	Callback = function(New, Old)
+		WallHack.Visuals.HeadDotSettings.Filled = New
+	end
+}).Default = WallHack.Visuals.HeadDotSettings.Filled
+
+HeadDotsSettings:AddSlider({
+	Name = "Transparency",
+	Value = WallHack.Visuals.HeadDotSettings.Transparency,
+	Callback = function(New, Old)
+		WallHack.Visuals.HeadDotSettings.Transparency = New
+	end,
+	Min = 0,
+	Max = 1,
+	Decimals = 2
+}).Default = WallHack.Visuals.HeadDotSettings.Transparency
+
+HeadDotsSettings:AddSlider({
+	Name = "Thickness",
+	Value = WallHack.Visuals.HeadDotSettings.Thickness,
+	Callback = function(New, Old)
+		WallHack.Visuals.HeadDotSettings.Thickness = New
+	end,
+	Min = 1,
+	Max = 5
+}).Default = WallHack.Visuals.HeadDotSettings.Thickness
+
+HeadDotsSettings:AddSlider({
+	Name = "Sides",
+	Value = WallHack.Visuals.HeadDotSettings.Sides,
+	Callback = function(New, Old)
+		WallHack.Visuals.HeadDotSettings.Sides = New
+	end,
+	Min = 3,
+	Max = 60
+}).Default = WallHack.Visuals.HeadDotSettings.Sides
+
+HeadDotsSettings:AddColorpicker({
+	Name = "Color",
+	Value = WallHack.Visuals.HeadDotSettings.Color,
+	Callback = function(New, Old)
+		WallHack.Visuals.HeadDotSettings.Color = New
+	end
+}).Default = WallHack.Visuals.HeadDotSettings.Color
+
+HealthBarSettings:AddToggle({
+	Name = "Enabled",
+	Value = WallHack.Visuals.HealthBarSettings.Enabled,
+	Callback = function(New, Old)
+		WallHack.Visuals.HealthBarSettings.Enabled = New
+	end
+}).Default = WallHack.Visuals.HealthBarSettings.Enabled
+
+HealthBarSettings:AddDropdown({
+	Name = "Position",
+	Value = WallHack.Visuals.HealthBarSettings.Type == 1 and "Top" or WallHack.Visuals.HealthBarSettings.Type == 2 and "Bottom" or WallHack.Visuals.HealthBarSettings.Type == 3 and "Left" or "Right",
+	Callback = function(New, Old)
+		WallHack.Visuals.HealthBarSettings.Type = New == "Top" and 1 or New == "Bottom" and 2 or New == "Left" and 3 or 4
+	end,
+	List = {"Top", "Bottom", "Left", "Right"},
+	Nothing = "Left"
+}).Default = WallHack.Visuals.HealthBarSettings.Type == 1 and "Top" or WallHack.Visuals.HealthBarSettings.Type == 2 and "Bottom" or WallHack.Visuals.HealthBarSettings.Type == 3 and "Left" or "Right"
+
+HealthBarSettings:AddSlider({
+	Name = "Transparency",
+	Value = WallHack.Visuals.HealthBarSettings.Transparency,
+	Callback = function(New, Old)
+		WallHack.Visuals.HealthBarSettings.Transparency = New
+	end,
+	Min = 0,
+	Max = 1,
+	Decimals = 2
+}).Default = WallHack.Visuals.HealthBarSettings.Transparency
+
+HealthBarSettings:AddSlider({
+	Name = "Size",
+	Value = WallHack.Visuals.HealthBarSettings.Size,
+	Callback = function(New, Old)
+		WallHack.Visuals.HealthBarSettings.Size = New
+	end,
+	Min = 2,
+	Max = 10
+}).Default = WallHack.Visuals.HealthBarSettings.Size
+
+HealthBarSettings:AddSlider({
+	Name = "Blue",
+	Value = WallHack.Visuals.HealthBarSettings.Blue,
+	Callback = function(New, Old)
+		WallHack.Visuals.HealthBarSettings.Blue = New
+	end,
+	Min = 0,
+	Max = 255
+}).Default = WallHack.Visuals.HealthBarSettings.Blue
+
+HealthBarSettings:AddSlider({
+	Name = "Offset",
+	Value = WallHack.Visuals.HealthBarSettings.Offset,
+	Callback = function(New, Old)
+		WallHack.Visuals.HealthBarSettings.Offset = New
+	end,
+	Min = -30,
+	Max = 30
+}).Default = WallHack.Visuals.HealthBarSettings.Offset
+
+HealthBarSettings:AddColorpicker({
+	Name = "Outline Color",
+	Value = WallHack.Visuals.HealthBarSettings.OutlineColor,
+	Callback = function(New, Old)
+		WallHack.Visuals.HealthBarSettings.OutlineColor = New
+	end
+}).Default = WallHack.Visuals.HealthBarSettings.OutlineColor
+
+--// Crosshair Settings
+
+CrosshairSettings:AddToggle({
+	Name = "Mouse Cursor",
+	Value = UserInputService.MouseIconEnabled,
+	Callback = function(New, Old)
+		UserInputService.MouseIconEnabled = New
+	end
+}).Default = UserInputService.MouseIconEnabled
+
+CrosshairSettings:AddToggle({
+	Name = "Enabled",
+	Value = WallHack.Crosshair.Settings.Enabled,
+	Callback = function(New, Old)
+		WallHack.Crosshair.Settings.Enabled = New
+	end
+}).Default = WallHack.Crosshair.Settings.Enabled
+
+CrosshairSettings:AddColorpicker({
+	Name = "Color",
+	Value = WallHack.Crosshair.Settings.Color,
+	Callback = function(New, Old)
+		WallHack.Crosshair.Settings.Color = New
+	end
+}).Default = WallHack.Crosshair.Settings.Color
+
+CrosshairSettings:AddSlider({
+	Name = "Transparency",
+	Value = WallHack.Crosshair.Settings.Transparency,
+	Callback = function(New, Old)
+		WallHack.Crosshair.Settings.Transparency = New
+	end,
+	Min = 0,
+	Max = 1,
+	Decimals = 2
+}).Default = WallHack.Crosshair.Settings.Transparency
+
+CrosshairSettings:AddSlider({
+	Name = "Size",
+	Value = WallHack.Crosshair.Settings.Size,
+	Callback = function(New, Old)
+		WallHack.Crosshair.Settings.Size = New
+	end,
+	Min = 8,
+	Max = 24
+}).Default = WallHack.Crosshair.Settings.Size
+
+CrosshairSettings:AddSlider({
+	Name = "Thickness",
+	Value = WallHack.Crosshair.Settings.Thickness,
+	Callback = function(New, Old)
+		WallHack.Crosshair.Settings.Thickness = New
+	end,
+	Min = 1,
+	Max = 5
+}).Default = WallHack.Crosshair.Settings.Thickness
+
+CrosshairSettings:AddSlider({
+	Name = "Gap Size",
+	Value = WallHack.Crosshair.Settings.GapSize,
+	Callback = function(New, Old)
+		WallHack.Crosshair.Settings.GapSize = New
+	end,
+	Min = 0,
+	Max = 20
+}).Default = WallHack.Crosshair.Settings.GapSize
+
+CrosshairSettings:AddSlider({
+	Name = "Rotation (Degrees)",
+	Value = WallHack.Crosshair.Settings.Rotation,
+	Callback = function(New, Old)
+		WallHack.Crosshair.Settings.Rotation = New
+	end,
+	Min = -180,
+	Max = 180
+}).Default = WallHack.Crosshair.Settings.Rotation
+
+CrosshairSettings:AddDropdown({
+	Name = "Position",
+	Value = WallHack.Crosshair.Settings.Type == 1 and "Mouse" or "Center",
+	Callback = function(New, Old)
+		WallHack.Crosshair.Settings.Type = New == "Mouse" and 1 or 2
+	end,
+	List = {"Mouse", "Center"},
+	Nothing = "Mouse"
+}).Default = WallHack.Crosshair.Settings.Type == 1 and "Mouse" or "Center"
+
+CrosshairSettings_CenterDot:AddToggle({
+	Name = "Center Dot",
+	Value = WallHack.Crosshair.Settings.CenterDot,
+	Callback = function(New, Old)
+		WallHack.Crosshair.Settings.CenterDot = New
+	end
+}).Default = WallHack.Crosshair.Settings.CenterDot
+
+CrosshairSettings_CenterDot:AddColorpicker({
+	Name = "Center Dot Color",
+	Value = WallHack.Crosshair.Settings.CenterDotColor,
+	Callback = function(New, Old)
+		WallHack.Crosshair.Settings.CenterDotColor = New
+	end
+}).Default = WallHack.Crosshair.Settings.CenterDotColor
+
+CrosshairSettings_CenterDot:AddSlider({
+	Name = "Center Dot Size",
+	Value = WallHack.Crosshair.Settings.CenterDotSize,
+	Callback = function(New, Old)
+		WallHack.Crosshair.Settings.CenterDotSize = New
+	end,
+	Min = 1,
+	Max = 6
+}).Default = WallHack.Crosshair.Settings.CenterDotSize
+
+CrosshairSettings_CenterDot:AddSlider({
+	Name = "Center Dot Transparency",
+	Value = WallHack.Crosshair.Settings.CenterDotTransparency,
+	Callback = function(New, Old)
+		WallHack.Crosshair.Settings.CenterDotTransparency = New
+	end,
+	Min = 0,
+	Max = 1,
+	Decimals = 2
+}).Default = WallHack.Crosshair.Settings.CenterDotTransparency
+
+CrosshairSettings_CenterDot:AddToggle({
+	Name = "Center Dot Filled",
+	Value = WallHack.Crosshair.Settings.CenterDotFilled,
+	Callback = function(New, Old)
+		WallHack.Crosshair.Settings.CenterDotFilled = New
+	end
+}).Default = WallHack.Crosshair.Settings.CenterDotFilled
+
+--// Functions / Functions
+
+FunctionsSection:AddButton({
+	Name = "Reset Settings",
+	Callback = function()
+		Aimbot.Functions:ResetSettings()
+		WallHack.Functions:ResetSettings()
+		Library.ResetAll()
+	end
+})
+
+FunctionsSection:AddButton({
+	Name = "Restart",
+	Callback = function()
+		Aimbot.Functions:Restart()
+		WallHack.Functions:Restart()
+	end
+})
+
+FunctionsSection:AddButton({
+	Name = "Exit",
+	Callback = Library.Unload,
+})
+
+FunctionsSection:AddButton({
+	Name = "Copy Script Page",
+	Callback = function()
+		setclipboard("https://github.com/Exunys/AirHub")
+	end
+})
+
+--// AirHub V2 Prompt
+
+do
+	local Aux = Instance.new("BindableFunction")
+    
+	Aux.OnInvoke = function(Answer)
+		if Answer == "No" then
 			return
 		end
 
-		if Input.UserInputType == Enum.UserInputType.Keyboard and Input.KeyCode == TriggerKey or Input.UserInputType == TriggerKey then
-			if Toggle then
-				Running = not Running
-
-				if not Running then
-					CancelLock()
-				end
-			else
-				Running = true
-			end
-		end
-	end)
-
-	ServiceConnections.InputEndedConnection = Connect(__index(UserInputService, "InputEnded"), function(Input)
-		local TriggerKey, Toggle = Settings.TriggerKey, Settings.Toggle
-
-		if Toggle or Typing then
-			return
-		end
-
-		if Input.UserInputType == Enum.UserInputType.Keyboard and Input.KeyCode == TriggerKey or Input.UserInputType == TriggerKey then
-			Running = false
-			CancelLock()
-		end
-	end)
-end
-
---// Typing Check
-
-ServiceConnections.TypingStartedConnection = Connect(__index(UserInputService, "TextBoxFocused"), function()
-	Typing = true
-end)
-
-ServiceConnections.TypingEndedConnection = Connect(__index(UserInputService, "TextBoxFocusReleased"), function()
-	Typing = false
-end)
-
---// Functions
-
-function Environment.Exit(self) -- METHOD | ExunysDeveloperAimbot:Exit(<void>)
-	assert(self, "EXUNYS_AIMBOT-V3.Exit: Missing parameter #1 \"self\" <table>.")
-
-	for Index, _ in next, ServiceConnections do
-		Disconnect(ServiceConnections[Index])
+		Library.Unload()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/AirHub-V2/main/src/Main.lua"))()
 	end
 
-	Load = nil; ConvertVector = nil; CancelLock = nil; GetClosestPlayer = nil; GetRainbowColor = nil; FixUsername = nil
-
-	self.FOVCircle:Remove()
-	self.FOVCircleOutline:Remove()
-	getgenv().ExunysDeveloperAimbot = nil
+	game.StarterGui:SetCore("SendNotification", {
+		Title = "🎆  AirHub V2  🎆",
+		Text = "Would you like to use the new AirHub V2 script?",
+		Button1 = "Yes",
+		Button2 = "No",
+		Duration = 1 / 0,
+		Icon = "rbxassetid://6238537240",
+		Callback = Aux
+	})
 end
-
-function Environment.Restart() -- ExunysDeveloperAimbot.Restart(<void>)
-	for Index, _ in next, ServiceConnections do
-		Disconnect(ServiceConnections[Index])
-	end
-
-	Load()
-end
-
-function Environment.Blacklist(self, Username) -- METHOD | ExunysDeveloperAimbot:Blacklist(<string> Player Name)
-	assert(self, "EXUNYS_AIMBOT-V3.Blacklist: Missing parameter #1 \"self\" <table>.")
-	assert(Username, "EXUNYS_AIMBOT-V3.Blacklist: Missing parameter #2 \"Username\" <string>.")
-
-	Username = FixUsername(Username)
-
-	assert(self, "EXUNYS_AIMBOT-V3.Blacklist: User "..Username.." couldn't be found.")
-
-	self.Blacklisted[#self.Blacklisted + 1] = Username
-end
-
-function Environment.Whitelist(self, Username) -- METHOD | ExunysDeveloperAimbot:Whitelist(<string> Player Name)
-	assert(self, "EXUNYS_AIMBOT-V3.Whitelist: Missing parameter #1 \"self\" <table>.")
-	assert(Username, "EXUNYS_AIMBOT-V3.Whitelist: Missing parameter #2 \"Username\" <string>.")
-
-	Username = FixUsername(Username)
-
-	assert(Username, "EXUNYS_AIMBOT-V3.Whitelist: User "..Username.." couldn't be found.")
-
-	local Index = tablefind(self.Blacklisted, Username)
-
-	assert(Index, "EXUNYS_AIMBOT-V3.Whitelist: User "..Username.." is not blacklisted.")
-
-	tableremove(self.Blacklisted, Index)
-end
-
-function Environment.GetClosestPlayer() -- ExunysDeveloperAimbot.GetClosestPlayer(<void>)
-	GetClosestPlayer()
-	local Value = Environment.Locked
-	CancelLock()
-
-	return Value
-end
-
-Environment.Load = Load -- ExunysDeveloperAimbot.Load()
-
-setmetatable(Environment, {__call = Load})
-
-return Environment
